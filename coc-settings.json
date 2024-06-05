@@ -1,0 +1,6 @@
+{
+  "clangd.path": "/usr/bin/clangd",
+  "eslint.autoFixOnSave": true,
+  "eslint.packageManager": "yarn",
+  "snippets.ultisnips.pythonPrompt": false
+}
