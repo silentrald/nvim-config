@@ -77,6 +77,9 @@ local plugins = {
   'stevearc/conform.nvim',
   'mfussenegger/nvim-lint',
 
+  -- Discord stuff
+  'andweeb/presence.nvim',
+
   -- Theme
   -- { 'rose-pine/neovim', as = 'rose-pine' },
   'folke/tokyonight.nvim'
