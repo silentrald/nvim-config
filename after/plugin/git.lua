@@ -1,7 +1,7 @@
 require('gitblame').setup {
   enabled = true,
   message_template = '> <committer>, <summary> (<committer-date>)',
-  date_format = '%m/%d/%Y, %I:%M %p',
+  date_format = '%Y-%m-%d, %I:%M %p',
   highlight_group = 'Blamer',
 }
 
