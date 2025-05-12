@@ -69,7 +69,7 @@ end)
 require('mason').setup({})
 require('mason-lspconfig').setup({
   ensure_installed = {
-    'tsserver',
+    'ts_ls',
     'rust_analyzer',
     'clangd',
     'html',
@@ -79,6 +79,48 @@ require('mason-lspconfig').setup({
     lua_ls = function()
       local lua_opts = lsp_zero.nvim_lua_ls()
       require('lspconfig').lua_ls.setup(lua_opts)
+    end,
+    pylsp = function()
+      require('lspconfig').pylsp.setup({
+        settings = {
+          pylsp = {
+            configurationSources = { 'flake8' },
+            plugins = {
+              flake8 = {
+                enabled = true,
+                ignore = {
+                  'E203',
+                  'E402',
+                },
+                maxLineLength = 80,
+              },
+              mccabe = { enabled = false },
+              pycodestyle = { enabled = false },
+              pyflakes = { enabled = false },
+            },
+          },
+        },
+      })
+    end,
+    rust_analyzer = function()
+      return true
+    end,
+    ts_ls = function()
+      local mason_registry = require('mason-registry')
+      local vue_language_server_path = mason_registry.get_package('vue-language-server'):get_install_path() .. '/node_modules/@vue/language-server'
+      print('vue language server path ' .. vue_language_server_path)
+      require('lspconfig').ts_ls.setup({
+        init_options = {
+          plugins = {
+            {
+              name = '@vue/typescript-plugin',
+              location = vue_language_server_path,
+              languages = { 'vue' },
+            },
+          },
+        },
+        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+      })
     end,
   },
 })
