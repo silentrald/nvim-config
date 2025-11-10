@@ -8,8 +8,8 @@ vim.keymap.set("n", "<C-S-Down>", ":m .+1<CR>==")
 vim.keymap.set("n", "<C-S-Up>", ":m .-2<CR>==")
 vim.keymap.set("i", "<C-S-Down>", "<Esc>:m .+1<CR>==gi")
 vim.keymap.set("i", "<C-S-Up>", "<Esc>:m .-2<CR>==gi")
-vim.keymap.set("v", "<C-S-Down>", ":m \">+1<CR>gv=gv")
-vim.keymap.set("v", "<C-S-Up>", ":m \"<-2<CR>gv=gv")
+vim.keymap.set("v", "<C-S-Down>", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "<C-S-Up>", ":m '<-2<CR>gv=gv")
 
 vim.keymap.set("n", "<C-s>", ":w<CR>")
 
