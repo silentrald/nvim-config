@@ -72,7 +72,7 @@ require('mason-lspconfig').setup({
     'ts_ls',
     'rust_analyzer',
     'clangd',
-    'html',
+    'html'
   },
   handlers = {
     lsp_zero.default_setup,
@@ -105,24 +105,70 @@ require('mason-lspconfig').setup({
     rust_analyzer = function()
       return true
     end,
-    ts_ls = function()
-      local mason_registry = require('mason-registry')
-      local vue_language_server_path = mason_registry.get_package('vue-language-server'):get_install_path() .. '/node_modules/@vue/language-server'
-      require('lspconfig').ts_ls.setup({
-        init_options = {
-          plugins = {
-            {
-              name = '@vue/typescript-plugin',
-              location = vue_language_server_path,
-              languages = { 'vue' },
-            },
-          },
-        },
-        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
-      })
-    end,
   },
 })
+
+local vue_language_server_path = vim.fn.stdpath('data') .. "/mason/packages/vue-language-server/node_modules/@vue/language-server"
+local tsserver_filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' }
+local vue_plugin = {
+  name = '@vue/typescript-plugin',
+  location = vue_language_server_path,
+  languages = { 'vue' },
+  configNamespace = 'typescript',
+}
+
+local ts_ls_config = {
+  init_options = {
+    plugins = {
+      vue_plugin,
+    },
+  },
+  filetypes = tsserver_filetypes,
+}
+
+-- If you are not on most recent `nvim-lspconfig` or you want to override
+local vue_ls_config = {
+  on_init = function(client)
+    client.handlers['tsserver/request'] = function(_, result, context)
+      local ts_clients = vim.lsp.get_clients({ bufnr = context.bufnr, name = 'ts_ls' })
+      local clients = {}
+
+      vim.list_extend(clients, ts_clients)
+
+      if #clients == 0 then
+        vim.notify('Could not find `vtsls` or `ts_ls` lsp client, `vue_ls` would not work without it.', vim.log.levels.ERROR)
+        return
+      end
+      local ts_client = clients[1]
+
+      local param = unpack(result)
+      local id, command, payload = unpack(param)
+      ts_client:exec_cmd({
+        title = 'vue_request_forward', -- You can give title anything as it's used to represent a command in the UI, `:h Client:exec_cmd`
+        command = 'typescript.tsserverRequest',
+        arguments = {
+          command,
+          payload,
+        },
+      }, { bufnr = context.bufnr }, function(_, r)
+          local response = r and r.body
+          -- TODO: handle error or response nil here, e.g. logging
+          -- NOTE: Do NOT return if there's an error or no response, just return nil back to the vue_ls to prevent memory leak
+          local response_data = { { id, response } }
+
+          ---@diagnostic disable-next-line: param-type-mismatch
+          client:notify('tsserver/response', response_data)
+        end)
+    end
+  end,
+}
+
+vim.lsp.config('vue_ls', vue_ls_config)
+vim.lsp.config('ts_ls', ts_ls_config)
+vim.lsp.enable({'ts_ls', 'vue_ls'}) -- If using `ts_ls` replace `vtsls` to `ts_ls`
+
+vim.lsp.config('gdscript', {})
+vim.lsp.enable('gdscript')
 
 local cmp = require('cmp')
 local cmp_select = { behavior = cmp.SelectBehavior.Select }
